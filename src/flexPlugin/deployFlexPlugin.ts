@@ -54,10 +54,11 @@ export const deployFlexPlugin = async (attributes: any) => {
 
         await execFile('twilio', [
             'flex:plugins:deploy',
-            `--changelog=${attributes.changelog || 'deployed by infra as code'}`,
+            `--changelog="${attributes.changelog || 'deployed by infra as code'}"`,
             ...setDeployFlags(attributes)
         ], {
             cwd: absolutePath,
+            shell: true,
             stdio: 'inherit',
             env
         });
@@ -75,6 +76,7 @@ export const deployFlexPlugin = async (attributes: any) => {
                     ...setReleaseFlags(attributes.release, pluginPackageJson)
                 ], {
                     cwd: absolutePath,
+                    shell: true,
                     stdio: 'inherit',
                     env
                 });
