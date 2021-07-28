@@ -52,6 +52,16 @@ export const deployFlexPlugin = async (attributes: any) => {
             ...(attributes.env || {})
         };
 
+        await execFile('npm', [
+            'install',
+        ], {
+            cwd: absolutePath,
+            shell: true,
+            stdio: 'inherit',
+            env
+        });
+
+
         await execFile('twilio', [
             'flex:plugins:deploy',
             `--changelog="${attributes.changelog || 'deployed by infra as code'}"`,
@@ -82,6 +92,45 @@ export const deployFlexPlugin = async (attributes: any) => {
                 });
 
             }
+
+        }
+
+    } catch (err) {
+
+        throw new Error(err);
+
+    }
+
+}
+
+export const disableFlexPlugin = async (attributes: any) => {
+    
+    const execFile = util.promisify(require('child_process').execFile);
+
+    try {
+        
+        const { absolutePath } = getPaths(attributes.cwd);
+
+        const env = { 
+            ...process.env,
+            ...(attributes.env || {})
+        };
+
+        const pluginPackageJson = 
+            require(`${absolutePath}/package.json`);
+
+        if(pluginPackageJson) {
+
+            await execFile('twilio', [
+                'flex:plugins:release', 
+                `--disable-plugin=${pluginPackageJson.name}`
+            ], {
+                cwd: absolutePath,
+                shell: true,
+                stdio: 'inherit',
+                env
+            });
+
 
         }
 
