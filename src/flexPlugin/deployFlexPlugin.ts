@@ -7,7 +7,7 @@ const setDeployFlags = (attributes:any):string[] => {
     const result = [];
 
     if(attributes.description) {
-        result.push(`--description=${attributes.description}`)
+        result.push(`--description="${attributes.description}"`)
     }
 
     ['major', 'minor', 'patch', 'public'].forEach(flag => {
@@ -25,11 +25,11 @@ const setReleaseFlags = (attributes:any, packageJson:any):string[] => {
     const result = [];
 
     if(attributes.name) {
-        result.push(`--name=${attributes.name}`)
+        result.push(`--name="${attributes.name}"`)
     }
 
     if(attributes.description) {
-        result.push(`--description=${attributes.description}`)
+        result.push(`--description="${attributes.description}"`)
     }
 
     if(attributes.disablePlugin) {
@@ -54,10 +54,11 @@ export const deployFlexPlugin = async (attributes: any) => {
 
         await execFile('twilio', [
             'flex:plugins:deploy',
-            `--changelog=${attributes.changelog || 'deployed by infra as code'}`,
+            `--changelog="${attributes.changelog || 'deployed by infra as code'}"`,
             ...setDeployFlags(attributes)
         ], {
             cwd: absolutePath,
+            shell: true,
             stdio: 'inherit',
             env
         });
@@ -75,6 +76,7 @@ export const deployFlexPlugin = async (attributes: any) => {
                     ...setReleaseFlags(attributes.release, pluginPackageJson)
                 ], {
                     cwd: absolutePath,
+                    shell: true,
                     stdio: 'inherit',
                     env
                 });
