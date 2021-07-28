@@ -7,7 +7,7 @@ const setDeployFlags = (attributes:any):string[] => {
     const result = [];
 
     if(attributes.description) {
-        result.push(`--description=${attributes.description}`)
+        result.push(`--description="${attributes.description}"`)
     }
 
     ['major', 'minor', 'patch', 'public'].forEach(flag => {
@@ -25,11 +25,11 @@ const setReleaseFlags = (attributes:any, packageJson:any):string[] => {
     const result = [];
 
     if(attributes.name) {
-        result.push(`--name=${attributes.name}`)
+        result.push(`--name="${attributes.name}"`)
     }
 
     if(attributes.description) {
-        result.push(`--description=${attributes.description}`)
+        result.push(`--description="${attributes.description}"`)
     }
 
     if(attributes.disablePlugin) {
