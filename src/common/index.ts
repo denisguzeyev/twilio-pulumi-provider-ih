@@ -1,6 +1,6 @@
 import * as pulumi from "@pulumi/pulumi";
 import { isEqual } from "lodash";
-import { findResourceByFriendlyName, getTwilioClient, isEqualFromImportResource } from "../utils";
+import { findResourceByKeyAttribute, getTwilioClient, isEqualFromImportResource } from "../utils";
 import { getAPI, cleanObject } from "../utils/api";
 
 export interface WorkspaceArgs {
@@ -17,16 +17,16 @@ class ResourceProvider implements pulumi.dynamic.ResourceProvider {
         const { attributes, resource } = news;
 
 
-        if(!olds.attributes && FIND_BEFORE_CREATE === "true" &&  attributes.friendlyName) {
+        if(!olds.attributes && FIND_BEFORE_CREATE === "true" &&  (attributes.uniqueName || attributes.friendlyName)) {
 
-            const existingResource = await findResourceByFriendlyName(client, resource, attributes);
+            const existingResource = await findResourceByKeyAttribute(client, resource, attributes);
 
             if(existingResource) {
 
                 const attributesString = 
                     isEqualFromImportResource(existingResource, attributes) ? "the same" : "different";
 
-                pulumi.log.info(`Resource "${attributes.friendlyName}" will be imported and attributes are ${attributesString}`);
+                pulumi.log.info(`Resource "${attributes.uniqueName || attributes.friendlyName}" will be imported and attributes are ${attributesString}`);
                 
             }
 
@@ -81,15 +81,15 @@ class ResourceProvider implements pulumi.dynamic.ResourceProvider {
 
         let info:any;
 
-        if(FIND_BEFORE_CREATE === "true" &&  attributes.friendlyName) {
+        if(FIND_BEFORE_CREATE === "true" &&  (attributes.uniqueName || attributes.friendlyName)) {
 
-            existingResource = await findResourceByFriendlyName(client, resource, attributes);
+            existingResource = await findResourceByKeyAttribute(client, resource, attributes);
         }
 
         if(attributes.sid || existingResource) {
 
             if(existingResource) {
-                pulumi.log.info(`Resource "${attributes.friendlyName} was imported`);
+                pulumi.log.info(`Resource "${attributes.uniqueName || attributes.friendlyName}" was imported`);
             }
 
             const sid = attributes.sid || existingResource.sid;
