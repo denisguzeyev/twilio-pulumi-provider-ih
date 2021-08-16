@@ -85,10 +85,6 @@ class FlexPluginProvider implements pulumi.dynamic.ResourceProvider {
     }
 
     public async delete(id:pulumi.ID, props: any) {
-        
-        const client = getTwilioClient();
-
-        await getAPI(client, ["serverless", { "services" : props.serviceSid }, "environments" ])(id).remove();
 
         const { attributes } = props.inputs;
 
