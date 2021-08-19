@@ -1,7 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 import { isEqual } from "lodash";
 import { getAPI } from "../utils/api";
-import { deployFlexPlugin } from './deployFlexPlugin';
+import { deployFlexPlugin, disableFlexPlugin } from './deployFlexPlugin';
 import { hashElement } from 'folder-hash';
 import { getService } from '../serverless/checkServerless';
 import { getPaths, getTwilioClient } from "../utils";
@@ -86,9 +86,9 @@ class FlexPluginProvider implements pulumi.dynamic.ResourceProvider {
 
     public async delete(id:pulumi.ID, props: any) {
 
-        const client = getTwilioClient();
+        const { attributes } = props.inputs;
 
-        await getAPI(client, ["serverless", { "services" : props.serviceSid }, "environments" ])(id).remove();
+        await disableFlexPlugin(attributes);
 
     }
 }
