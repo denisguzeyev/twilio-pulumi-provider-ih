@@ -74,15 +74,16 @@ export const getTwilioClient = (opts?:any) => {
         twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 }
 
-export const findResourceByFriendlyName = async (client:any, resource:any, attributes:any) => {
+export const findResourceByKeyAttribute = async (client:any, resource:any, attributes:any) => {
 
     try {
-
+        const keyAttributeName: string = attributes.uniqueName ? 'uniqueName' : 'friendlyName';
+        const listOptions = {[keyAttributeName]: attributes[keyAttributeName]};
         const resources = await getAPI(client, resource)
-            .list({ friendlyName: attributes.friendlyName });
+            .list(listOptions);
 
         const existingResource = 
-            resources.find((elem:any) => elem.friendlyName === attributes.friendlyName);
+            resources.find((elem:any) => elem[keyAttributeName] === attributes[keyAttributeName]);
 
         return existingResource;
 
