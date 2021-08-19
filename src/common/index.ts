@@ -2,6 +2,7 @@ import * as pulumi from "@pulumi/pulumi";
 import { isEqual } from "lodash";
 import { findResourceByFriendlyName, getTwilioClient, isEqualFromImportResource } from "../utils";
 import { getAPI, cleanObject } from "../utils/api";
+import { exponentialBackoff } from "../utils/exponentialBackoff";
 
 export interface WorkspaceArgs {
     resource: pulumi.Input<any>;
@@ -62,7 +63,8 @@ class ResourceProvider implements pulumi.dynamic.ResourceProvider {
 
         const client : any = getTwilioClient();
 
-        const info = cleanObject(await getAPI(client, inputs.resource)(id).fetch(), false);
+        const api = getAPI(client, inputs.resource)(id);
+        const info = cleanObject(await exponentialBackoff(api, api.fetch, []), false);
 
         return {
             id: info.sid,
@@ -93,12 +95,12 @@ class ResourceProvider implements pulumi.dynamic.ResourceProvider {
             }
 
             const sid = attributes.sid || existingResource.sid;
-            
-            info = cleanObject(await getAPI(client, resource)(sid).update(attributes), false);
+            const api = getAPI(client, resource)(sid);
+            info = cleanObject(await exponentialBackoff(api, api.update, [attributes]), false);
 
         } else {
-
-            info = cleanObject(await (getAPI(client, resource).create(attributes)), false);
+            let api = getAPI(client, resource);
+            info = cleanObject(await exponentialBackoff(api, api.create, [attributes]), false); 
 
         }
             
@@ -114,7 +116,9 @@ class ResourceProvider implements pulumi.dynamic.ResourceProvider {
 
         const { resource, attributes } = news;
 
-        const info = cleanObject(await getAPI(client, resource)(id).update(attributes), false);
+        const api = getAPI(client, resource)(id);
+
+        const info = cleanObject(await exponentialBackoff(api, api.update, [attributes]), false);
 
         return {
             outs: { sid: info.sid, inputs: cleanObject(news, false), info: cleanObject(info, false) }
@@ -126,8 +130,8 @@ class ResourceProvider implements pulumi.dynamic.ResourceProvider {
        const client = getTwilioClient();
 
        if(!props.inputs.attributes.sid && !props.inputs.attributes.replaceAndNotDelete){
-
-        await getAPI(client, props.inputs.resource)(id).remove();
+        const api = getAPI(client, props.inputs.resource)(id);
+        await exponentialBackoff(api, api.remove, []);
 
        }
 
