@@ -18,7 +18,7 @@ After installing the CLI, you need to login using `pulumi login`. By default, th
 To install via npm, run:
 
 ```
-npm install twilio-pulumi-provider
+npm install twilio-pulumi-provider-ih
 ```
 
 Also, this package has Pulumi as a `peerDependency` so you can use other providers in your code. To install, just run:
