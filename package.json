@@ -1,6 +1,6 @@
 {
   "name": "twilio-pulumi-provider",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Twilio Dynamic Provider for Pulumi",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,7 @@
     "@pulumi/pulumi": "^3.0.0"
   },
   "dependencies": {
-    "@twilio-labs/serverless-api": "^4.1.0",
+    "@twilio-labs/serverless-api": "5.1.1",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "folder-hash": "^3.3.3",
