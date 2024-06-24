@@ -1,6 +1,6 @@
 {
   "name": "twilio-pulumi-provider-ih",
-  "version": "0.1.0",
+  "version": "0.1.16",
   "description": "Twilio Dynamic Provider for Pulumi",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,7 +19,7 @@
     "folder-hash": "^3.3.3",
     "lodash": "^4.17.21",
     "path": "^0.12.7",
-    "twilio": "^3.57.0"
+    "twilio": "5.2.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.11",

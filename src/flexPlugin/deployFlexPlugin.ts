@@ -57,7 +57,7 @@ export const deployFlexPlugin = async (attributes: any) => {
         ], {
             cwd: absolutePath,
             shell: true,
-            stdio: 'inherit',
+            stdio: [process.stdin, process.stdout, process.stderr],
             env
         });
 
@@ -70,7 +70,7 @@ export const deployFlexPlugin = async (attributes: any) => {
         ], {
             cwd: absolutePath,
             shell: true,
-            stdio: 'inherit',
+            stdio: [process.stdin, process.stdout, process.stderr],
             env
         });
 
@@ -88,7 +88,7 @@ export const deployFlexPlugin = async (attributes: any) => {
                 ], {
                     cwd: absolutePath,
                     shell: true,
-                    stdio: 'inherit',
+                    stdio: [process.stdin, process.stdout, process.stderr],
                     env
                 });
 
@@ -128,7 +128,7 @@ export const disableFlexPlugin = async (attributes: any) => {
             ], {
                 cwd: absolutePath,
                 shell: true,
-                stdio: 'inherit',
+                stdio: [process.stdin, process.stdout, process.stderr],
                 env
             });
 
