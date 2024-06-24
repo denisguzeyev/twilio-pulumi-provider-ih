@@ -65,6 +65,7 @@ export const deployFlexPlugin = async (attributes: any) => {
         await execFile('twilio', [
             'flex:plugins:deploy',
             `--changelog="${attributes.changelog || 'deployed by infra as code'}"`,
+            `--bypass-validation`,
             ...setDeployFlags(attributes)
         ], {
             cwd: absolutePath,
