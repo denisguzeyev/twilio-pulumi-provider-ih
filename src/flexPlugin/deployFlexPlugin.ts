@@ -98,7 +98,8 @@ export const deployFlexPlugin = async (attributes: any) => {
 
     } catch (err) {
 
-        throw new Error(err);
+        console.log(err);
+        throw new Error('error');
 
     }
 
@@ -137,7 +138,8 @@ export const disableFlexPlugin = async (attributes: any) => {
 
     } catch (err) {
 
-        throw new Error(err);
+        console.log(err);
+        throw new Error('error');
 
     }
 
