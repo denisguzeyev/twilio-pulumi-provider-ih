@@ -53,7 +53,7 @@ export const deployFlexPlugin = async (attributes: any) => {
         };
 
         await execFile('npm', [
-            'install --legacy-peer-deps',
+            'npm install --legacy-peer-deps --allow-remote=all',
         ], {
             cwd: absolutePath,
             shell: true,
