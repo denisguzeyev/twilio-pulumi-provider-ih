@@ -1,6 +1,6 @@
-import { getPaths } from "../utils";
+﻿import { getPaths } from "../utils";
+import { execFileStreaming } from "../utils/execFile";
 import { hashElement } from 'folder-hash';
-import * as util from 'util';
 
 const setDeployFlags = (attributes:any):string[] => {
 
@@ -12,7 +12,7 @@ const setDeployFlags = (attributes:any):string[] => {
 
     ['major', 'minor', 'patch', 'public'].forEach(flag => {
         if(attributes[flag]){ 
-            result.push(`--${flag}`)
+            result.push(`--${flag}`)
         }
     });
 
@@ -39,30 +39,45 @@ const setReleaseFlags = (attributes:any, packageJson:any):string[] => {
     return result;
 }
 
-export const deployFlexPlugin = async (attributes: any) => {
+const toError = (err: unknown, context: string): Error => {
 
-    const execFile = util.promisify(require('child_process').execFile);
+    const message = err instanceof Error ? err.message : String(err);
+
+    return new Error(`${context}: ${message}`);
+
+}
+
+/**
+ * `twilio flex:plugins:deploy` asks "Plugin package has already been uploaded
+ * previously for this version of the plugin. Would you like to overwrite it?"
+ * whenever a previous deployment uploaded the assets without registering the
+ * version. The CLI only skips that prompt when `CI` is exactly "true"
+ * (`env.isCI()` in flex-plugins-utils-env), otherwise it blocks on stdin.
+ */
+const buildEnv = (attributes: any): NodeJS.ProcessEnv => ({
+    CI: 'true',
+    ...process.env,
+    ...(attributes.env || {})
+});
+
+export const deployFlexPlugin = async (attributes: any) => {
 
     try {
 
         const { absolutePath } = getPaths(attributes.cwd);
 
-        const env = { 
-            ...process.env,
-            ...(attributes.env || {})
-        };
+        const env = buildEnv(attributes);
 
-        await execFile('npm', [
+        await execFileStreaming('npm', [
             'install --legacy-peer-deps --allow-remote=all',
         ], {
             cwd: absolutePath,
             shell: true,
-            stdio: [process.stdin, process.stdout, process.stderr],
             env
         });
 
 
-        await execFile('twilio', [
+        await execFileStreaming('twilio', [
             'flex:plugins:deploy',
             `--changelog="${attributes.changelog || 'deployed by infra as code'}"`,
             `--bypass-validation`,
@@ -70,7 +85,6 @@ export const deployFlexPlugin = async (attributes: any) => {
         ], {
             cwd: absolutePath,
             shell: true,
-            stdio: [process.stdin, process.stdout, process.stderr],
             env
         });
 
@@ -81,14 +95,13 @@ export const deployFlexPlugin = async (attributes: any) => {
 
             if(pluginPackageJson) {
 
-                await execFile('twilio', [
+                await execFileStreaming('twilio', [
                     'flex:plugins:release', 
                     `--enable-plugin=${pluginPackageJson.name}@latest`,
                     ...setReleaseFlags(attributes.release, pluginPackageJson)
                 ], {
                     cwd: absolutePath,
                     shell: true,
-                    stdio: [process.stdin, process.stdout, process.stderr],
                     env
                 });
 
@@ -98,38 +111,31 @@ export const deployFlexPlugin = async (attributes: any) => {
 
     } catch (err) {
 
-        console.log(err);
-        throw new Error('error');
+        throw toError(err, `Failed to deploy flex plugin "${attributes.cwd}"`);
 
     }
 
 }
 
 export const disableFlexPlugin = async (attributes: any) => {
-    
-    const execFile = util.promisify(require('child_process').execFile);
 
     try {
         
         const { absolutePath } = getPaths(attributes.cwd);
 
-        const env = { 
-            ...process.env,
-            ...(attributes.env || {})
-        };
+        const env = buildEnv(attributes);
 
         const pluginPackageJson = 
             require(`${absolutePath}/package.json`);
 
         if(pluginPackageJson) {
 
-            await execFile('twilio', [
+            await execFileStreaming('twilio', [
                 'flex:plugins:release', 
                 `--disable-plugin=${pluginPackageJson.name}`
             ], {
                 cwd: absolutePath,
                 shell: true,
-                stdio: [process.stdin, process.stdout, process.stderr],
                 env
             });
 
@@ -138,8 +144,7 @@ export const disableFlexPlugin = async (attributes: any) => {
 
     } catch (err) {
 
-        console.log(err);
-        throw new Error('error');
+        throw toError(err, `Failed to disable flex plugin "${attributes.cwd}"`);
 
     }
 
